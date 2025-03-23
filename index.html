@@ -1,0 +1,67 @@
+"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity Tracker</title>
+    <style>
+        body { font-family: sans-serif; }
+        .container { width: 400px; margin: 0 auto; }
+        input[type="date"], input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; cursor: pointer; }
+        #activityList { margin-top: 20px; }
+        .activity-entry { border: 1px solid #ddd; padding: 10px; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Activity Tracker</h1>
+        <input type="date" id="dateInput">
+        <input type="text" id="activityInput" placeholder="Activity">
+        <input type="number" id="durationInput" placeholder="Duration (minutes)">
+        <button onclick="addActivity()">Add Activity</button>
+        <div id="activityList"></div>
+    </div>
+
+    <script>
+        function addActivity() {
+            const date = document.getElementById('dateInput').value;
+            const activity = document.getElementById('activityInput').value;
+            const duration = document.getElementById('durationInput').value;
+
+            fetch('/add_activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date, activity, duration })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    loadActivities();
+                } else {
+                    alert(data.error);
+                }
+            });
+
+            document.getElementById('activityInput').value = '';
+            document.getElementById('durationInput').value = '';
+        }
+
+        function loadActivities() {
+            const date = document.getElementById('dateInput').value;
+            fetch(`/get_activities?date=${date}`)
+                .then(response => response.json())
+                .then(activities => {
+                    const activityList = document.getElementById('activityList');
+                    activityList.innerHTML = '';
+                    activities.forEach(item => {
+                        activityList.innerHTML += `<div class="activity-entry">${item.activity}: ${item.duration} minutes</div>`;
+                    });
+                });
+        }
+
+        document.getElementById('dateInput').addEventListener('change', loadActivities);
+        loadActivities(); //Initial load
+    </script>
+</body>
+</html>
+"""
